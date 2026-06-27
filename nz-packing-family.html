@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>NZ Trip Packing — Fawkes Family</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #083050;
+    --green: #39B54A;
+    --light: #f4f7fb;
+    --mid: #e0e8f0;
+    --text: #1a2a3a;
+    --muted: #6b8299;
+    --danger: #c0392b;
+    --white: #ffffff;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(8,48,80,0.10);
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--light);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 50px;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--blue);
+    color: var(--white);
+    padding: 16px 18px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 14px rgba(8,48,80,0.3);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .header-title { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+  .header-accent { color: var(--green); }
+  .header-sub { font-size: 11px; color: rgba(255,255,255,0.45); }
+
+  /* COUNTDOWN */
+  .countdown-strip {
+    background: rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .countdown-label { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+  .countdown-units { display: flex; gap: 8px; align-items: center; }
+  .countdown-unit { text-align: center; }
+  .countdown-num { font-size: 24px; font-weight: 800; line-height: 1; color: var(--green); letter-spacing: -1px; }
+  .countdown-unit-label { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-top: 2px; }
+  .countdown-sep { font-size: 20px; font-weight: 700; color: rgba(255,255,255,0.2); padding-bottom: 6px; }
+  .countdown-depart { text-align: right; }
+  .countdown-depart-date { font-size: 12px; font-weight: 700; color: var(--white); }
+  .countdown-depart-sub { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+
+  /* PERSON TABS */
+  .person-tabs {
+    display: flex;
+    gap: 0;
+    margin: 0 -18px;
+  }
+  .person-tab {
+    flex: 1;
+    padding: 10px 4px 12px;
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .person-tab .tab-avatar { font-size: 20px; margin-bottom: 3px; }
+  .person-tab .tab-name { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.45); letter-spacing: 0.3px; text-transform: uppercase; }
+  .person-tab .tab-prog { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+  .person-tab.active { border-bottom-color: var(--green); }
+  .person-tab.active .tab-name { color: var(--white); }
+  .person-tab.active .tab-prog { color: rgba(255,255,255,0.55); }
+
+  /* PROGRESS */
+  .progress-wrap { padding: 10px 18px 14px; background: var(--blue); }
+  .progress-bar-bg { background: rgba(255,255,255,0.15); border-radius: 99px; height: 5px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: var(--green); border-radius: 99px; transition: width 0.4s ease; }
+  .progress-label { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 5px; text-align: right; }
+
+  /* CONTENT */
+  .container { max-width: 600px; margin: 0 auto; padding: 14px 14px; }
+  .person-pane { display: none; }
+  .person-pane.active { display: block; }
+
+  .warning-banner {
+    background: #fff3cd; border-left: 4px solid #f0a500; border-radius: var(--radius);
+    padding: 10px 13px; font-size: 13px; color: #7a5a00; margin-bottom: 12px;
+    display: none; align-items: flex-start; gap: 8px; line-height: 1.4;
+  }
+  .warning-banner.show { display: flex; }
+
+  /* CATEGORIES */
+  .category-block { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden; }
+  .category-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; background: var(--blue); cursor: pointer;
+    user-select: none; -webkit-tap-highlight-color: transparent;
+  }
+  .category-header-left { display: flex; align-items: center; gap: 8px; }
+  .cat-icon { font-size: 17px; }
+  .cat-name { font-size: 13px; font-weight: 700; color: var(--white); letter-spacing: 0.4px; text-transform: uppercase; }
+  .cat-badge { font-size: 11px; background: rgba(255,255,255,0.18); color: rgba(255,255,255,0.85); border-radius: 99px; padding: 2px 8px; }
+  .cat-badge.complete { background: var(--green); color: #fff; }
+  .cat-chevron { font-size: 11px; color: rgba(255,255,255,0.5); transition: transform 0.2s; }
+  .cat-chevron.open { transform: rotate(180deg); }
+  .category-items { padding: 2px 0; }
+
+  .item-row {
+    display: flex; align-items: center; padding: 10px 14px;
+    border-bottom: 1px solid var(--mid); gap: 10px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .item-row:last-child { border-bottom: none; }
+
+  .item-check {
+    width: 22px; height: 22px; min-width: 22px; border-radius: 6px;
+    border: 2px solid var(--mid); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s; background: var(--white);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .item-check.checked { background: var(--green); border-color: var(--green); }
+  .item-check.checked::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
+
+  .item-label { flex: 1; font-size: 15px; color: var(--text); cursor: pointer; line-height: 1.3; min-width: 0; word-break: break-word; }
+  .item-label.checked { text-decoration: line-through; opacity: 0.38; }
+
+  .item-edit-input {
+    flex: 1; font-size: 15px; color: var(--text); border: 1.5px solid var(--green);
+    border-radius: 7px; padding: 5px 8px; background: #f0faf1; outline: none;
+    min-width: 0; -webkit-appearance: none;
+  }
+
+  .item-btn {
+    background: none; border: none; font-size: 15px; cursor: pointer;
+    padding: 3px 3px; color: var(--muted); -webkit-tap-highlight-color: transparent;
+    line-height: 1; transition: color 0.15s; flex-shrink: 0;
+  }
+  .item-btn.save { color: var(--green); font-size: 17px; }
+  .item-btn.delete { color: #ccc; font-size: 20px; }
+  .item-btn.delete:active { color: var(--danger); }
+
+  .item-critical {
+    font-size: 10px; background: #fff0f0; color: #c0392b; border-radius: 99px;
+    padding: 2px 7px; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+  }
+
+  .add-item-row { display: flex; padding: 9px 12px; gap: 8px; border-top: 1px solid var(--mid); background: var(--light); }
+  .add-item-input {
+    flex: 1; border: 1.5px solid var(--mid); border-radius: 8px; padding: 8px 12px;
+    font-size: 14px; background: var(--white); color: var(--text); outline: none; -webkit-appearance: none;
+  }
+  .add-item-input:focus { border-color: var(--green); }
+  .add-item-btn {
+    background: var(--green); color: white; border: none; border-radius: 8px;
+    padding: 8px 14px; font-size: 14px; font-weight: 700; cursor: pointer;
+    -webkit-tap-highlight-color: transparent; white-space: nowrap;
+  }
+  .add-item-btn:active { opacity: 0.85; }
+
+  .all-done { text-align: center; padding: 20px; color: var(--green); font-weight: 700; font-size: 16px; display: none; }
+  .all-done.show { display: block; }
+
+  .reset-btn {
+    display: block; width: 100%; background: transparent; border: 1.5px solid var(--mid);
+    color: var(--muted); border-radius: var(--radius); padding: 11px; font-size: 13px;
+    cursor: pointer; -webkit-tap-highlight-color: transparent; margin-top: 4px;
+  }
+  .reset-btn:active { background: var(--mid); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="header-title">NZ Trip <span class="header-accent">✈</span></div>
+      <div class="header-sub">Fawkes Family · 9–21 Jul · Hamilton</div>
+    </div>
+  </div>
+
+  <div class="countdown-strip">
+    <div>
+      <div class="countdown-label">Departure in</div>
+      <div class="countdown-units">
+        <div class="countdown-unit"><div class="countdown-num" id="cdDays">--</div><div class="countdown-unit-label">days</div></div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-unit"><div class="countdown-num" id="cdHours">--</div><div class="countdown-unit-label">hrs</div></div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-unit"><div class="countdown-num" id="cdMins">--</div><div class="countdown-unit-label">min</div></div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-unit"><div class="countdown-num" id="cdSecs">--</div><div class="countdown-unit-label">sec</div></div>
+      </div>
+    </div>
+    <div class="countdown-depart">
+      <div class="countdown-depart-date">Tue 8 July</div>
+      <div class="countdown-depart-sub">7:50 PM AWST</div>
+    </div>
+  </div>
+
+  <div class="person-tabs" id="personTabs">
+    <div class="person-tab active" data-person="andrew" onclick="switchPerson('andrew')">
+      <div class="tab-avatar">👨‍💼</div>
+      <div class="tab-name">Andrew</div>
+      <div class="tab-prog" id="prog_andrew">0/0</div>
+    </div>
+    <div class="person-tab" data-person="astrid" onclick="switchPerson('astrid')">
+      <div class="tab-avatar">👩</div>
+      <div class="tab-name">Astrid</div>
+      <div class="tab-prog" id="prog_astrid">0/0</div>
+    </div>
+    <div class="person-tab" data-person="milani" onclick="switchPerson('milani')">
+      <div class="tab-avatar">👶</div>
+      <div class="tab-name">Milani</div>
+      <div class="tab-prog" id="prog_milani">0/0</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 0 packed</div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="warning-banner" id="warningBanner"><span>⚠️</span><span id="warningText"></span></div>
+
+  <div class="person-pane active" id="pane_andrew"></div>
+  <div class="person-pane" id="pane_astrid"></div>
+  <div class="person-pane" id="pane_milani"></div>
+
+  <div class="all-done" id="allDone">🎉 All packed!</div>
+  <button class="reset-btn" onclick="resetChecks()">Reset all checkboxes (current tab)</button>
+</div>
+
+<script>
+const DEPART = new Date('2025-07-08T19:50:00+08:00');
+
+function updateCountdown() {
+  const diff = DEPART - new Date();
+  if (diff <= 0) {
+    ['cdDays','cdHours','cdMins','cdSecs'].forEach(id => document.getElementById(id).textContent = '00');
+    return;
+  }
+  const s = Math.floor(diff/1000);
+  document.getElementById('cdDays').textContent  = String(Math.floor(s/86400)).padStart(2,'0');
+  document.getElementById('cdHours').textContent = String(Math.floor((s%86400)/3600)).padStart(2,'0');
+  document.getElementById('cdMins').textContent  = String(Math.floor((s%3600)/60)).padStart(2,'0');
+  document.getElementById('cdSecs').textContent  = String(s%60).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// ===================== DEFAULT DATA =====================
+const DEFAULTS = {
+  andrew: [
+    { id: 'docs', icon: '📋', name: 'Documents & Travel', open: true, items: [
+      { id: 'd1', label: 'Passport (check expiry)', critical: true },
+      { id: 'd2', label: 'NZeTA / arrival card (Aus citizen — confirm exempt)', critical: true },
+      { id: 'd3', label: 'Travel insurance', critical: true },
+      { id: 'd4', label: 'Flight itinerary (offline)', critical: true },
+      { id: 'd5', label: 'Hotel confirmations', critical: true },
+      { id: 'd6', label: 'Hire car confirmation' },
+      { id: 'd7', label: 'Meeting agenda (printed)' },
+      { id: 'd8', label: 'Emergency contacts' },
+    ]},
+    { id: 'clothes', icon: '👔', name: 'Clothing', open: false, items: [
+      { id: 'c1', label: 'Business shirts (7–8, iron-free)' },
+      { id: 'c2', label: 'Suit jacket or blazer' },
+      { id: 'c3', label: 'Dress trousers (2–3 pairs)' },
+      { id: 'c4', label: 'Smart casual jeans' },
+      { id: 'c5', label: 'T-shirts / casual (3–4)' },
+      { id: 'c6', label: 'Thermal base layer (NZ July = 5–12°C)' },
+      { id: 'c7', label: 'Fleece / mid layer' },
+      { id: 'c8', label: 'Warm outer jacket' },
+      { id: 'c9', label: 'Socks (10+ pairs)' },
+      { id: 'c10', label: 'Underwear (10+ pairs)' },
+      { id: 'c11', label: 'Dress shoes (polished)' },
+      { id: 'c12', label: 'Casual shoes / sneakers' },
+      { id: 'c13', label: 'Belt' },
+      { id: 'c14', label: 'Pyjamas' },
+      { id: 'c15', label: 'Gym gear + shoes' },
+      { id: 'c16', label: 'Scarf / beanie (Dunedin cold)' },
+    ]},
+    { id: 'toiletries', icon: '🪥', name: 'Toiletries & Health', open: false, items: [
+      { id: 't1', label: 'Toothbrush & toothpaste' },
+      { id: 't2', label: 'Deodorant' },
+      { id: 't3', label: 'Shampoo / conditioner' },
+      { id: 't4', label: 'Body wash' },
+      { id: 't5', label: 'Face wash & moisturiser' },
+      { id: 't6', label: 'Razor & shaving cream' },
+      { id: 't7', label: 'Hair product' },
+      { id: 't8', label: 'Lip balm' },
+      { id: 't9', label: 'Paracetamol / ibuprofen' },
+      { id: 't10', label: 'Prescription meds (2-week supply)' },
+      { id: 't11', label: 'Vitamins / supplements' },
+      { id: 't12', label: 'Band-aids' },
+      { id: 't13', label: 'Hand sanitiser' },
+      { id: 't14', label: 'Sunscreen' },
+    ]},
+    { id: 'tech', icon: '💻', name: 'Tech & Devices', open: false, items: [
+      { id: 'e1', label: 'Laptop + charger', critical: true },
+      { id: 'e2', label: 'Phone + charger', critical: true },
+      { id: 'e3', label: 'Power bank' },
+      { id: 'e4', label: 'AirPods / earphones' },
+      { id: 'e5', label: 'USB-C cables (spares)' },
+      { id: 'e6', label: 'Confirm international roaming' },
+      { id: 'e7', label: 'HDMI dongle / presenter adapter' },
+      { id: 'e8', label: 'Smart watch + charger' },
+      { id: 'e9', label: 'USB drive (backup)' },
+    ]},
+    { id: 'business', icon: '💼', name: 'Business & BD', open: false, items: [
+      { id: 'b1', label: 'ROX x BHP brochures (print + digital)', critical: true },
+      { id: 'b2', label: 'Bend-tech capability one-pager' },
+      { id: 'b3', label: 'Business cards (plenty)' },
+      { id: 'b4', label: 'Meeting prep — OceanaGold Waihi' },
+      { id: 'b5', label: 'Meeting prep — OMV NZ New Plymouth' },
+      { id: 'b6', label: 'Meeting prep — OceanaGold Macraes' },
+      { id: 'b7', label: 'TBC prep — Bathurst Resources' },
+      { id: 'b8', label: 'TBC prep — Fonterra' },
+      { id: 'b9', label: 'Notebook + pens' },
+      { id: 'b10', label: 'HubSpot mobile synced' },
+    ]},
+    { id: 'finance', icon: '💳', name: 'Money & Finance', open: false, items: [
+      { id: 'f1', label: 'Travel card (no intl fees)', critical: true },
+      { id: 'f2', label: 'Backup credit card', critical: true },
+      { id: 'f3', label: 'NZD cash (rural, tips)' },
+      { id: 'f4', label: 'Notify bank of travel' },
+      { id: 'f5', label: 'Expense receipts process sorted' },
+    ]},
+    { id: 'bags', icon: '🧳', name: 'Bags', open: false, items: [
+      { id: 'g1', label: 'Main suitcase (check-in, 12 nights)' },
+      { id: 'g2', label: 'Carry-on bag' },
+      { id: 'g3', label: 'Luggage locks' },
+      { id: 'g4', label: 'Packing cubes' },
+      { id: 'g5', label: 'Umbrella' },
+    ]},
+    { id: 'misc', icon: '🔧', name: 'Before You Leave', open: false, items: [
+      { id: 'm1', label: 'Share full itinerary with Astrid' },
+      { id: 'm2', label: 'Key copied / left with Astrid' },
+      { id: 'm3', label: 'Check in on Milani arrangements' },
+      { id: 'm4', label: 'Eye mask & earplugs' },
+      { id: 'm5', label: 'Book or e-reader' },
+    ]},
+  ],
+
+  astrid: [
+    { id: 'docs', icon: '📋', name: 'Documents & Travel', open: true, items: [
+      { id: 'a_d1', label: 'NZ Passport (Fawkes name — confirm updated)', critical: true },
+      { id: 'a_d2', label: 'Travel insurance details', critical: true },
+      { id: 'a_d3', label: 'Flight itinerary (offline)', critical: true },
+      { id: 'a_d4', label: 'Hotel confirmations', critical: true },
+      { id: 'a_d5', label: 'Medicare card' },
+      { id: 'a_d6', label: 'Milani\'s birth certificate (travel with infant)' },
+    ]},
+    { id: 'clothes', icon: '👗', name: 'Clothing', open: false, items: [
+      { id: 'a_c1', label: 'Warm everyday tops / jumpers (NZ July = cold)' },
+      { id: 'a_c2', label: 'Jeans / casual trousers (3–4 pairs)' },
+      { id: 'a_c3', label: 'Leggings (comfortable for travel + baby days)' },
+      { id: 'a_c4', label: 'Thermal underlayer' },
+      { id: 'a_c5', label: 'Warm outer jacket / coat' },
+      { id: 'a_c6', label: 'Comfortable walking shoes' },
+      { id: 'a_c7', label: 'Warm socks (8+ pairs)' },
+      { id: 'a_c8', label: 'Underwear / bras (nursing bras if breastfeeding)' },
+      { id: 'a_c9', label: 'Pyjamas / comfortable nightwear' },
+      { id: 'a_c10', label: 'Scarf / beanie / gloves' },
+      { id: 'a_c11', label: 'Loungewear for hotel downtime' },
+      { id: 'a_c12', label: 'Dressier outfit (if going out)' },
+    ]},
+    { id: 'toiletries', icon: '🪥', name: 'Toiletries & Health', open: false, items: [
+      { id: 'a_t1', label: 'Toothbrush & toothpaste' },
+      { id: 'a_t2', label: 'Deodorant' },
+      { id: 'a_t3', label: 'Shampoo / conditioner' },
+      { id: 'a_t4', label: 'Body wash' },
+      { id: 'a_t5', label: 'Skincare routine (cleanser, moisturiser, SPF)' },
+      { id: 'a_t6', label: 'Makeup + remover' },
+      { id: 'a_t7', label: 'Hair dryer (or confirm hotel has one)' },
+      { id: 'a_t8', label: 'Hairbrush / styling tools' },
+      { id: 'a_t9', label: 'Feminine hygiene products' },
+      { id: 'a_t10', label: 'Paracetamol / ibuprofen' },
+      { id: 'a_t11', label: 'Postnatal vitamins / supplements' },
+      { id: 'a_t12', label: 'Nipple cream / nursing pads (if breastfeeding)' },
+      { id: 'a_t13', label: 'Breast pump + accessories (if needed)' },
+      { id: 'a_t14', label: 'Hand sanitiser' },
+      { id: 'a_t15', label: 'Lip balm' },
+    ]},
+    { id: 'tech', icon: '📱', name: 'Tech & Devices', open: false, items: [
+      { id: 'a_e1', label: 'Phone + charger', critical: true },
+      { id: 'a_e2', label: 'Baby monitor (travel version)' },
+      { id: 'a_e3', label: 'Tablet or e-reader (downtime)' },
+      { id: 'a_e4', label: 'Earphones' },
+      { id: 'a_e5', label: 'Portable charger / power bank' },
+      { id: 'a_e6', label: 'Camera or phone camera ready' },
+    ]},
+    { id: 'finance', icon: '💳', name: 'Money', open: false, items: [
+      { id: 'a_f1', label: 'Card / access to funds', critical: true },
+      { id: 'a_f2', label: 'NZD cash for day-to-day' },
+    ]},
+    { id: 'bags', icon: '🧳', name: 'Bags', open: false, items: [
+      { id: 'a_g1', label: 'Main luggage / suitcase' },
+      { id: 'a_g2', label: 'Day bag / nappy bag (dual purpose)' },
+      { id: 'a_g3', label: 'Reusable bags' },
+      { id: 'a_g4', label: 'Umbrella or rain jacket' },
+    ]},
+  ],
+
+  milani: [
+    { id: 'essential', icon: '⭐', name: 'Essentials', open: true, items: [
+      { id: 'mi_e1', label: 'Passport (apply before travel — PC1 form)', critical: true },
+      { id: 'mi_e2', label: 'Birth certificate (carry original)', critical: true },
+      { id: 'mi_e3', label: 'Medicare card', critical: true },
+      { id: 'mi_e4', label: 'Travel insurance (confirm covers infant)', critical: true },
+      { id: 'mi_e5', label: 'GP / paediatrician contact details' },
+      { id: 'mi_e6', label: 'Red book / health record' },
+    ]},
+    { id: 'feeding', icon: '🍼', name: 'Feeding', open: false, items: [
+      { id: 'mi_f1', label: 'Formula (full supply + extra)' },
+      { id: 'mi_f2', label: 'Bottles (4–5) + bottle brush' },
+      { id: 'mi_f3', label: 'Bottle steriliser (travel size or microwave bags)' },
+      { id: 'mi_f4', label: 'Breast milk storage bags (if expressing)' },
+      { id: 'mi_f5', label: 'Bibs (6–8)' },
+      { id: 'mi_f6', label: 'Burp cloths (6–8)' },
+      { id: 'mi_f7', label: 'Dummy / soother + case' },
+    ]},
+    { id: 'nappy', icon: '🚼', name: 'Nappy & Hygiene', open: false, items: [
+      { id: 'mi_n1', label: 'Nappies (5–6/day = ~70 for trip)' },
+      { id: 'mi_n2', label: 'Nappy bags (scented)' },
+      { id: 'mi_n3', label: 'Baby wipes (3+ packs)' },
+      { id: 'mi_n4', label: 'Nappy rash cream' },
+      { id: 'mi_n5', label: 'Portable change mat' },
+      { id: 'mi_n6', label: 'Hand sanitiser (for changing on the go)' },
+    ]},
+    { id: 'clothes', icon: '👶', name: 'Clothing', open: false, items: [
+      { id: 'mi_c1', label: 'Onesies long sleeve (8–10)' },
+      { id: 'mi_c2', label: 'Warm baby grows / sleep suits (6–8)' },
+      { id: 'mi_c3', label: 'Pants / leggings (4–5)' },
+      { id: 'mi_c4', label: 'Warm layer / fleece jacket' },
+      { id: 'mi_c5', label: 'Baby beanie / hat (must — NZ winter)' },
+      { id: 'mi_c6', label: 'Baby mittens + booties' },
+      { id: 'mi_c7', label: 'Baby snowsuit or puffer wrap' },
+      { id: 'mi_c8', label: 'Baby socks (8+ pairs)' },
+      { id: 'mi_c9', label: 'Muslin wraps / swaddles (3–4)' },
+    ]},
+    { id: 'sleep', icon: '😴', name: 'Sleep', open: false, items: [
+      { id: 'mi_sl1', label: 'Confirm hotel has travel cot / bassinet' },
+      { id: 'mi_sl2', label: 'Fitted travel cot sheet (own)' },
+      { id: 'mi_sl3', label: 'Baby sleeping bag (appropriate tog for winter)' },
+      { id: 'mi_sl4', label: 'White noise app / device' },
+      { id: 'mi_sl5', label: 'Blackout blind (portable)' },
+      { id: 'mi_sl6', label: 'Familiar comforter / toy' },
+    ]},
+    { id: 'health', icon: '💊', name: 'Health & Safety', open: false, items: [
+      { id: 'mi_h1', label: 'Baby paracetamol (Panadol infant)' },
+      { id: 'mi_h2', label: 'Saline nasal drops' },
+      { id: 'mi_h3', label: 'Baby thermometer' },
+      { id: 'mi_h4', label: 'Infant ibuprofen (if old enough)' },
+      { id: 'mi_h5', label: 'Baby sunscreen SPF 50+' },
+      { id: 'mi_h6', label: 'Baby first aid basics' },
+      { id: 'mi_h7', label: 'Nearest hospital / after-hours clinic in Hamilton noted' },
+    ]},
+    { id: 'travel', icon: '✈️', name: 'Travel & Getting Around', open: false, items: [
+      { id: 'mi_t1', label: 'Infant lap seat confirmed with airline', critical: true },
+      { id: 'mi_t2', label: 'Car seat (hire car compatible — confirm)' },
+      { id: 'mi_t3', label: 'Pram / stroller (check airline carry policy)' },
+      { id: 'mi_t4', label: 'Baby carrier / sling (hands-free)' },
+      { id: 'mi_t5', label: 'Pram rain cover' },
+      { id: 'mi_t6', label: 'Toys / activity for flight' },
+      { id: 'mi_t7', label: 'Pacifier for take-off/landing (pressure)' },
+      { id: 'mi_t8', label: 'Change of clothes in hand luggage (x2)' },
+      { id: 'mi_t9', label: 'Nappy bag packed for flight (accessible)' },
+    ]},
+  ]
+};
+
+const STORAGE_KEY = 'nz_family_packing_v1';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULTS));
+}
+function saveData(d) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch(e) {}
+}
+
+let allData = loadData();
+let activePerson = 'andrew';
+let editingId = null;
+
+function genId() { return 'x' + Date.now() + Math.floor(Math.random()*9999); }
+
+function personData() { return allData[activePerson]; }
+
+function totalFor(person) { return allData[person].reduce((s,c)=>s+c.items.length,0); }
+function doneFor(person) { return allData[person].reduce((s,c)=>s+c.items.filter(i=>i.checked).length,0); }
+
+function switchPerson(p) {
+  editingId = null;
+  activePerson = p;
+  document.querySelectorAll('.person-tab').forEach(t => t.classList.toggle('active', t.dataset.person === p));
+  document.querySelectorAll('.person-pane').forEach(pane => pane.classList.toggle('active', pane.id === 'pane_' + p));
+  renderAll();
+}
+
+function updateTabBadges() {
+  ['andrew','astrid','milani'].forEach(p => {
+    const el = document.getElementById('prog_' + p);
+    if (el) el.textContent = doneFor(p) + '/' + totalFor(p);
+  });
+}
+
+function updateProgress() {
+  const data = personData();
+  const total = data.reduce((s,c)=>s+c.items.length,0);
+  const done = data.reduce((s,c)=>s+c.items.filter(i=>i.checked).length,0);
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${done} of ${total} packed`;
+  document.getElementById('allDone').classList.toggle('show', total > 0 && done === total);
+
+  const uncritical = data.flatMap(c=>c.items.filter(i=>i.critical && !i.checked));
+  const banner = document.getElementById('warningBanner');
+  if (uncritical.length > 0) {
+    document.getElementById('warningText').textContent =
+      `${uncritical.length} critical item${uncritical.length>1?'s':''} not packed: ${uncritical.map(i=>i.label.split(' (')[0].split(' —')[0]).join(', ')}`;
+    banner.classList.add('show');
+  } else { banner.classList.remove('show'); }
+
+  updateTabBadges();
+}
+
+function toggleItem(catId, itemId) {
+  if (editingId === itemId) return;
+  const cat = personData().find(c=>c.id===catId);
+  const item = cat.items.find(i=>i.id===itemId);
+  item.checked = !item.checked;
+  saveData(allData);
+  renderAll();
+}
+
+function deleteItem(catId, itemId) {
+  const cat = personData().find(c=>c.id===catId);
+  cat.items = cat.items.filter(i=>i.id!==itemId);
+  editingId = null;
+  saveData(allData);
+  renderAll();
+}
+
+function startEdit(itemId) {
+  editingId = itemId;
+  renderAll();
+  const inp = document.getElementById('edit_' + itemId);
+  if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+}
+
+function saveEdit(catId, itemId) {
+  const inp = document.getElementById('edit_' + itemId);
+  if (!inp) return;
+  const val = inp.value.trim();
+  if (val) {
+    const cat = personData().find(c=>c.id===catId);
+    const item = cat.items.find(i=>i.id===itemId);
+    item.label = val;
+    saveData(allData);
+  }
+  editingId = null;
+  renderAll();
+}
+
+function addItem(catId, label) {
+  if (!label.trim()) return;
+  const cat = personData().find(c=>c.id===catId);
+  cat.items.push({ id: genId(), label: label.trim(), checked: false });
+  saveData(allData);
+  renderAll();
+}
+
+function toggleCategory(catId) {
+  editingId = null;
+  const cat = personData().find(c=>c.id===catId);
+  cat.open = !cat.open;
+  saveData(allData);
+  renderAll();
+}
+
+function resetChecks() {
+  if (!confirm('Reset all checkboxes for this person?')) return;
+  personData().forEach(c=>c.items.forEach(i=>i.checked=false));
+  saveData(allData);
+  renderAll();
+}
+
+function renderAll() {
+  const pane = document.getElementById('pane_' + activePerson);
+  pane.innerHTML = '';
+
+  personData().forEach(cat => {
+    const total = cat.items.length;
+    const done = cat.items.filter(i=>i.checked).length;
+    const complete = total > 0 && done === total;
+
+    const block = document.createElement('div');
+    block.className = 'category-block';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'category-header';
+    hdr.innerHTML = `
+      <div class="category-header-left">
+        <span class="cat-icon">${cat.icon}</span>
+        <span class="cat-name">${cat.name}</span>
+        <span class="cat-badge${complete?' complete':''}">${done}/${total}</span>
+      </div>
+      <span class="cat-chevron${cat.open?' open':''}">▼</span>`;
+    hdr.addEventListener('click', ()=>toggleCategory(cat.id));
+    block.appendChild(hdr);
+
+    if (cat.open) {
+      const itemsWrap = document.createElement('div');
+      itemsWrap.className = 'category-items';
+
+      cat.items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        const isEditing = editingId === item.id;
+
+        const chk = document.createElement('div');
+        chk.className = 'item-check' + (item.checked?' checked':'');
+        chk.addEventListener('click', ()=>toggleItem(cat.id, item.id));
+        row.appendChild(chk);
+
+        if (isEditing) {
+          const inp = document.createElement('input');
+          inp.type = 'text'; inp.id = 'edit_' + item.id;
+          inp.className = 'item-edit-input'; inp.value = item.label;
+          inp.addEventListener('keydown', e=>{
+            if (e.key==='Enter') saveEdit(cat.id,item.id);
+            if (e.key==='Escape') { editingId=null; renderAll(); }
+          });
+          row.appendChild(inp);
+          const saveBtn = document.createElement('button');
+          saveBtn.className = 'item-btn save'; saveBtn.textContent = '✓';
+          saveBtn.addEventListener('click', ()=>saveEdit(cat.id,item.id));
+          row.appendChild(saveBtn);
+        } else {
+          const lbl = document.createElement('div');
+          lbl.className = 'item-label'+(item.checked?' checked':'');
+          lbl.textContent = item.label;
+          lbl.addEventListener('click', ()=>toggleItem(cat.id,item.id));
+          row.appendChild(lbl);
+
+          if (item.critical && !item.checked) {
+            const badge = document.createElement('span');
+            badge.className = 'item-critical'; badge.textContent = 'critical';
+            row.appendChild(badge);
+          }
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'item-btn'; editBtn.textContent = '✏️';
+          editBtn.addEventListener('click', e=>{ e.stopPropagation(); startEdit(item.id); });
+          row.appendChild(editBtn);
+        }
+
+        const del = document.createElement('button');
+        del.className = 'item-btn delete'; del.textContent = '×';
+        del.addEventListener('click', ()=>deleteItem(cat.id,item.id));
+        row.appendChild(del);
+
+        itemsWrap.appendChild(row);
+      });
+
+      const addRow = document.createElement('div');
+      addRow.className = 'add-item-row';
+      const input = document.createElement('input');
+      input.className = 'add-item-input'; input.placeholder = 'Add item...'; input.type = 'text';
+      input.addEventListener('keydown', e=>{
+        if (e.key==='Enter') { addItem(cat.id,input.value); input.value=''; }
+      });
+      const btn = document.createElement('button');
+      btn.className = 'add-item-btn'; btn.textContent = '+ Add';
+      btn.addEventListener('click', ()=>{ addItem(cat.id,input.value); input.value=''; });
+      addRow.appendChild(input); addRow.appendChild(btn);
+      itemsWrap.appendChild(addRow);
+      block.appendChild(itemsWrap);
+    }
+
+    pane.appendChild(block);
+  });
+
+  updateProgress();
+}
+
+renderAll();
+updateTabBadges();
+</script>
+</body>
+</html>
